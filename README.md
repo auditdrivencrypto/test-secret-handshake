@@ -9,7 +9,7 @@ are all parsed correctly.
 ## format
 
 The output is a JSON array, of objects with `{name, args, result}`
-all binary values are stored as base64 encoded strings.
+all binary values are stored as hex encoded strings.
 name is the name of an operation. _create_ operations take a `state` argument and return a packet.
 _verify_ operations take a `state`, an encrypted `packet` and return a new `state`
 (or null, if the packet was not valid given the state)
