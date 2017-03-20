@@ -35,8 +35,7 @@ process.on('exit', function () {
     path.join(__dirname, 'data.json'),
     '[\n' + output.map(function (obj) {
         obj = map(obj, function (e) {
-//          if(Buffer.isBuffer(e)) console.log(e.toString('base64'))
-          if(Buffer.isBuffer(e)) return e.toString('base64')
+          if(Buffer.isBuffer(e)) return e.toString('hex')
           return e
         })
         console.log(obj)
@@ -52,6 +51,7 @@ require('secret-handshake/test/net1')
 //require('secret-handshake/test/net1')
 require('secret-handshake/test/net2')
 //
+
 
 
 
