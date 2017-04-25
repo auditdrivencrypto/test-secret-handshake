@@ -59,7 +59,12 @@ input_filters.clientVerifyChallenge = function (a) {
   }
 }
 input_filters.clientCreateAuth = function (a) {
-  return a
+  return {
+    local: {
+      hello: new Buffer(a.local.hello)
+    },
+    secret2: new Buffer(a.secret2)
+  }
 }
 input_filters.serverVerifyAuth = function (a) {
   return a
