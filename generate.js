@@ -5,6 +5,7 @@ var path = require('path')
 var map = require('./map')
 
 input_filters = {}
+
 input_filters.initialize = function (a) {
   b = {
     app_key: new Buffer(a.app_key),
@@ -24,12 +25,26 @@ input_filters.initialize = function (a) {
   }
   return b
 }
+
 input_filters.createChallenge = function (a) {
-  return a
+  return {
+    local: {
+      kx_pk: new Buffer(a.local.kx_pk),
+      app_mac: new Buffer(a.local.app_mac)
+    }
+  }
 }
+
 input_filters.verifyChallenge = function (a) {
-  return a
+  return {
+    app_key: new Buffer(a.app_key),
+    local: {
+      kx_sk: new Buffer(a.local.kx_sk),
+    },
+    remote: {}
+  }
 }
+
 input_filters.clientVerifyChallenge = function (a) {
   return a
 }
@@ -52,21 +67,24 @@ input_filters.toKeys = function (a) {
   return a
 }
 
+function clone (m) {
+  return map(m, function (v) { return Buffer.isBuffer(v) ? new Buffer(v) : v })
+}
+
 function wrap (crypto, output) {
 
   function wrapFn (fn, name) {
     return function () {
       var args = [].slice.call(arguments)
-      args[0] = input_filters[name](args[0])
-      var origargs = input_filters[name](args[0])
+      var saved_input_state = clone(args[0])
+      var filter = input_filters[name]
+      args[0] = filter(args[0])
+      var saved_filtered_input_state = clone(args[0])
       var result = fn.apply(null, args)
-      args[0] = origargs
-      output(map({name: name, args: args, result: result}, function (v) {
-        //clone every object
-        if(Buffer.isBuffer(v)) return new Buffer(v)
-        return v
-      }))
-      return result
+      args[0] = saved_filtered_input_state // revert the change fn made on its input
+      output(clone({name: name, args: args, result: result}))
+      args[0] = saved_input_state
+      return fn.apply(null, args)
     }
   }
 
