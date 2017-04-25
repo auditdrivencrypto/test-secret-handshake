@@ -69,7 +69,19 @@ input_filters.clientCreateAuth = function (a) {
 }
 
 input_filters.serverVerifyAuth = function (a) {
-  return a
+  return {
+    app_key: a.app_key,
+    secret: a.secret,
+    shash: a.shash,
+    local: {
+      publicKey: a.local.publicKey,
+      secretKey: a.local.secretKey,
+      kx_sk: a.local.kx_sk
+    },
+    remote: {
+      kx_pk: a.remote.kx_pk
+    }
+  }
 }
 
 input_filters.serverCreateAccept = function (a) {
