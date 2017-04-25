@@ -39,14 +39,24 @@ input_filters.verifyChallenge = function (a) {
   return {
     app_key: new Buffer(a.app_key),
     local: {
-      kx_sk: new Buffer(a.local.kx_sk),
+      kx_sk: new Buffer(a.local.kx_sk)
     },
     remote: {}
   }
 }
 
 input_filters.clientVerifyChallenge = function (a) {
-  return a
+  return {
+    app_key: new Buffer(a.app_key),
+    local: {
+      kx_sk: new Buffer(a.local.kx_sk),
+      secretKey: new Buffer(a.local.secretKey),
+      publicKey: new Buffer(a.local.publicKey)
+    },
+    remote: {
+      publicKey: new Buffer(a.remote.publicKey)
+    }
+  }
 }
 input_filters.clientCreateAuth = function (a) {
   return a
