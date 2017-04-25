@@ -58,6 +58,7 @@ input_filters.clientVerifyChallenge = function (a) {
     }
   }
 }
+
 input_filters.clientCreateAuth = function (a) {
   return {
     local: {
@@ -66,18 +67,34 @@ input_filters.clientCreateAuth = function (a) {
     secret2: new Buffer(a.secret2)
   }
 }
+
 input_filters.serverVerifyAuth = function (a) {
   return a
 }
+
 input_filters.serverCreateAccept = function (a) {
-  return a
+  return {
+    app_key: new Buffer(a.app_key),
+    local: {
+      publicKey: new Buffer(a.local.publicKey),
+      secretKey: new Buffer(a.local.secretKey)
+    },
+    remote: {
+      hello: new Buffer(a.remote.hello)
+    },
+    shash: new Buffer(a.shash),
+    secret3: new Buffer(a.secret3)
+  }
 }
+
 input_filters.clean = function (a) {
   return a
 }
+
 input_filters.clientVerifyAccept = function (a) {
   return a
 }
+
 input_filters.toKeys = function (a) {
   return a
 }
