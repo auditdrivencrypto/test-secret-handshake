@@ -92,7 +92,21 @@ input_filters.clean = function (a) {
 }
 
 input_filters.clientVerifyAccept = function (a) {
-  return a
+  return {
+    app_key: new Buffer(a.app_key),
+    secret: new Buffer(a.secret),
+    a_bob: new Buffer(a.a_bob),
+    shash: new Buffer(a.shash),
+    local: {
+      publicKey: new Buffer(a.local.publicKey),
+      secretKey: new Buffer(a.local.secretKey),
+      hello: new Buffer(a.local.hello)
+    },
+    remote: {
+      kx_pk: new Buffer(a.remote.kx_pk),
+      publicKey: new Buffer(a.remote.publicKey) // TODO: get rid of these new Buffers
+    }
+  }
 }
 
 input_filters.toKeys = function (a) {
