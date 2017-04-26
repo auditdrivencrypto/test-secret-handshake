@@ -1,4 +1,3 @@
-// vim: set expandtab ts=2:
 //var JSONB = require('json-buffer')
 var fs = require('fs')
 var path = require('path')
