@@ -100,7 +100,22 @@ input_filters.serverCreateAccept = function (a) {
 }
 
 input_filters.clean = function (a) {
-  return a
+  return {
+    shash: a.shash,
+    secret: a.secret,
+    secret2: a.secret2,
+    secret3: a.secret3,
+    a_bob: a.a_bob,
+    b_alice: a.b_alice,
+    local: {
+      publicKey: a.local.publicKey,
+      secretKey: a.local.secretKey,
+      kx_sk: a.local.kx_sk
+    },
+    remote: {
+      publicKey: a.remote.publicKey
+    }
+  }
 }
 
 input_filters.clientVerifyAccept = function (a) {
