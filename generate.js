@@ -137,13 +137,9 @@ input_filters.clientVerifyAccept = function (a) {
 }
 
 input_filters.toKeys = function (a) {
-  if(Buffer.isBuffer(a, 32)) {
-    return a
-  } else {
-    return {
-      publicKey: a.publicKey,
-      secretKey: a.secretKey
-    }
+  return (Buffer.isBuffer(a, 32)) ? a : {
+    publicKey: a.publicKey,
+    secretKey: a.secretKey
   }
 }
 
@@ -199,14 +195,3 @@ require('secret-handshake/test/secret-handshake')
 require('secret-handshake/test/net1')
 //require('secret-handshake/test/net1')
 require('secret-handshake/test/net2')
-//
-
-
-
-
-
-
-
-
-
-
