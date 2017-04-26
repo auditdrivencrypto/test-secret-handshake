@@ -137,7 +137,14 @@ input_filters.clientVerifyAccept = function (a) {
 }
 
 input_filters.toKeys = function (a) {
-  return a
+  if(Buffer.isBuffer(a, 32)) {
+    return a
+  } else {
+    return {
+      publicKey: a.publicKey,
+      secretKey: a.secretKey
+    }
+  }
 }
 
 function clone (m) {
@@ -153,7 +160,7 @@ function wrap (crypto, output) {
       args[0] = input_filters[name](args[0])
       var saved_filtered_input_state = clone(args[0])
       var result = fn.apply(null, args)
-      args[0] = saved_filtered_input_state // revert the change fn made on its input
+      args[0] = saved_filtered_input_state // revert the changes fn made on its input
       output(clone({name: name, args: args, result: result}))
       args[0] = saved_input_state
       return fn.apply(null, args)
