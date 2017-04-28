@@ -3,18 +3,162 @@ var fs = require('fs')
 var path = require('path')
 var map = require('./map')
 
+input_filters = {}
+
+input_filters.initialize = function (a) {
+  b = {
+    app_key: a.app_key,
+    random: a.random
+  }
+  if (a.seed) b.seed = a.seed
+  if (a.local) {
+    x = {}
+    if (a.local.publicKey) x.publicKey = a.local.publicKey
+    if (a.local.secretKey) x.secretKey = a.local.secretKey
+    if (x != {}) b.local = x
+  }
+  if (a.remote) {
+    x = {}
+    if (a.remote.publicKey) x.publicKey = a.remote.publicKey
+    if (x != {}) b.remote = x
+  }
+  return b
+}
+
+input_filters.createChallenge = function (a) {
+  return {
+    local: {
+      kx_pk: a.local.kx_pk,
+      app_mac: a.local.app_mac
+    }
+  }
+}
+
+input_filters.verifyChallenge = function (a) {
+  return {
+    app_key: a.app_key,
+    local: {
+      kx_sk: a.local.kx_sk
+    },
+    remote: {}
+  }
+}
+
+input_filters.clientVerifyChallenge = function (a) {
+  return {
+    app_key: a.app_key,
+    local: {
+      kx_sk: a.local.kx_sk,
+      secretKey: a.local.secretKey,
+      publicKey: a.local.publicKey
+    },
+    remote: {
+      publicKey: a.remote.publicKey
+    }
+  }
+}
+
+input_filters.clientCreateAuth = function (a) {
+  return {
+    local: {
+      hello: a.local.hello
+    },
+    secret2: a.secret2
+  }
+}
+
+input_filters.serverVerifyAuth = function (a) {
+  return {
+    app_key: a.app_key,
+    secret: a.secret,
+    shash: a.shash,
+    local: {
+      publicKey: a.local.publicKey,
+      secretKey: a.local.secretKey,
+      kx_sk: a.local.kx_sk
+    },
+    remote: {
+      kx_pk: a.remote.kx_pk
+    }
+  }
+}
+
+input_filters.serverCreateAccept = function (a) {
+  return {
+    app_key: a.app_key,
+    local: {
+      publicKey: a.local.publicKey,
+      secretKey: a.local.secretKey
+    },
+    remote: {
+      hello: a.remote.hello
+    },
+    shash: a.shash,
+    secret3: a.secret3
+  }
+}
+
+input_filters.clean = function (a) {
+  return {
+    shash: a.shash,
+    secret: a.secret,
+    secret2: a.secret2,
+    secret3: a.secret3,
+    a_bob: a.a_bob,
+    b_alice: a.b_alice,
+    local: {
+      publicKey: a.local.publicKey,
+      secretKey: a.local.secretKey,
+      kx_sk: a.local.kx_sk
+    },
+    remote: {
+      publicKey: a.remote.publicKey
+    }
+  }
+}
+
+input_filters.clientVerifyAccept = function (a) {
+  return {
+    app_key: a.app_key,
+    secret: a.secret,
+    a_bob: a.a_bob,
+    shash: a.shash,
+    local: {
+      publicKey: a.local.publicKey,
+      secretKey: a.local.secretKey,
+      hello: a.local.hello
+    },
+    remote: {
+      kx_pk: a.remote.kx_pk,
+      publicKey: a.remote.publicKey
+    }
+  }
+}
+
+input_filters.toKeys = function (a) {
+  return (Buffer.isBuffer(a, 32)) ? a : {
+    publicKey: a.publicKey,
+    secretKey: a.secretKey
+  }
+}
+
+function clone (m) {
+  return map(m, function (v) { return Buffer.isBuffer(v) ? new Buffer(v) : v })
+}
+
 function wrap (crypto, output) {
 
   function wrapFn (fn, name) {
     return function () {
       var args = [].slice.call(arguments)
+      var saved_input_state = clone(args[0])
+      args[0] = input_filters[name](args[0])
+      var saved_filtered_input_state = clone(args[0])
       var result = fn.apply(null, args)
-      output(map({name: name, args: args, result: result}, function (v) {
-        //clone every object
-        if(Buffer.isBuffer(v)) return new Buffer(v)
-        return v
-      }))
-      return result
+      args[0] = saved_filtered_input_state // revert the changes fn made on its input
+      output(clone({name: name, args: args, result: result}))
+      args[0] = saved_input_state
+      return fn.apply(null, args)
     }
   }
 
@@ -50,14 +194,3 @@ require('secret-handshake/test/secret-handshake')
 require('secret-handshake/test/net1')
 //require('secret-handshake/test/net1')
 require('secret-handshake/test/net2')
-//
-
-
-
-
-
-
-
-
-
-
